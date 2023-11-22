@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<%- include('partials/head') %>
+<body>
+
+  <%- include('partials/navbar') %>
+
+        <div id="app">
+          <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+              <h1 class="h2">Inicio</h1>
+              <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group me-2">
+                  <button type="button" class="btn btn-sm btn-outline-primary" @click="newPost()">Nuevo Post</button>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
+                  <span data-feather="calendar"></span>
+                  This week
+                </button>
+              </div>
+            </div>
+
+            <!-- New Post -->
+            <div class="card mb-3" v-if="estado == estados.newPost">
+              <div class="card-body">
+                  <h5 class="card-title">Nuevo Post</h5>
+                <form @submit.prevent="createPost()">
+                  <div class="mb-3">
+                    <label for="postTitle" class="form-label">Título</label>
+                    <input type="text" class="form-control" id="postTitle" placeholder="Enter title" v-model="post.title">
+                  </div>
+                  <div class="mb-3">
+                    <label for="postDescription" class="form-label">Descripcion</label>
+                    <textarea class="form-control" id="postDescription" rows="3" placeholder="Enter description" v-model="post.description"></textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label for="postImage" class="form-label">Imágen</label>
+                    <input type="file" accept="image/*" class="form-control" refs="image" id="postImage" name="postImage" placeholder="Subir imágen" @change="subirImagen()" v-model="post.image">
+                  </div>
+                  <div class="row form-row">
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <div>
+                          <label for="postCategory" class="form-label">Categoría</label>
+                          <select name="postCategory" id="postCategory"  class="form-control" v-model="post.categoria_id">
+                            <option value="0" disabled>Seleccionar Categoria</option>
+                            <option v-for="category in categories" :value="category.cat_id">
+                              {{ category.cat_nombre }}
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <div class="mb-3">
+                          <label for="postTags" class="form-label">Tags</label>
+                          <select name="postTags" id="postTags" class="form-control" v-model="post.tags">
+                            <option value="" disabled>Seleccionar Tags</option>
+                            <option v-for="tag in tags" :value="tag.tag_id">
+                              {{ tag.tag_nombre }}
+                            </option>
+                          </select>
+                        </div>
+                      </div>                      
+                    </div> 
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <div class="mb-3">
+                          <label for="postRights" class="form-label">Rights</label>
+                          <select name="postRights" id="postRights" class="form-control" v-model="post.rights">
+                            <option value="" disabled>Seleccionar Derechos</option>
+                            <option value="0">Público</option>
+                            <option value="1">Protegido</option>
+                          </select>
+                        </div>
+                      </div>                      
+                    </div>      
+                  </div>
+                  <button type="button" class="btn btn-secondary" @click="cancelPost()">Cancelar</button>
+                  <button type="submit" class="btn btn-primary">Add Post</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Posts -->
+            <div v-for="post in posts">
+              <div class="card w-50">
+                <!-- Image -->
+                <div class="card-header d-flex">
+                  <img :src="post.Usuario.avatar" class="rounded-circle" width="50" alt="">
+                  <a class="text-decoration-none text-dark me-2" href="#"> {{ post.Usuario.usuario }} </a>
+                  <h5>{{ post.title }}</h5>
+                </div>
+                
+                <img class="img-fluid" :src="post.image" alt="Post Image">
+                <div class="card-body">
+                  <!-- Title -->
+                  <!-- Description -->
+                  <p class="card-text">{{ post.description }}</p>
+                  <p class="card-text">{{ post.Categorias.cat_nombre }}</p>
+                  <!-- Author and Date -->
+                  <p class="card-text">By {{ post.autor }} on {{ post.creation_date }}</p>
+                  <!-- Likes -->
+                  <p class="card-text">{{ post.likes }} Likes</p>
+                </div>
+              
+                <div class="card-footer">
+                  <small class="text-muted">Category: {{post.Categorias.cat_nombre}} </small>
+                  <!-- Tags -->
+                  <div class="d-flex">
+                    <small class="text-muted">Tags: </small>
+                    <div v-for="tag in post.Tags">
+                      <small class="text-muted"> {{tag.tag_nombre }} </small>
+                    </div>
+                  </div>
+                </div>
+              </div>        
+            </div>
+            
+          </main>
+        </div>
+
+      <script src="js/bootstrap.bundle.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js" integrity="sha384-uO3SXW5IuS1ZpFPKugNNWqTZRRglnUJK6UAZ/gxOX80nxEkN9NcGZTftn6RzhGWE" crossorigin="anonymous"></script><script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js" integrity="sha384-zNy6FEbO50N+Cg5wap8IKA4M/ZnLJgzc6w2NqACZaK0u0FXfOWRRJOnQtpZun8ha" crossorigin="anonymous"></script><script src="dashboard.js"></script>
+</body>
+</html>
+

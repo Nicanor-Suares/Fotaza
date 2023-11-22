@@ -15,8 +15,27 @@ fs.readdirSync(__dirname)
 console.log(models);
 
 //Associations
-models.Post.belongsTo(models.Usuario, {foreignKey: 'user_id'});
 models.Usuario.hasMany(models.Post);
+models.Post.belongsTo(models.Usuario, { foreignKey: 'user_id' });
+
+models.Categorias.hasMany(models.Post, { foreignKey: 'categoria_id', timestamps: false });
+models.Post.belongsTo(models.Categorias, { foreignKey: 'categoria_id', as: 'Categorias', timestamps: false });
+
+models.Post.belongsToMany(models.Tags, {
+  through: models.Foto_tag,
+  foreignKey: 'post_id',
+  as: 'Tags',
+});
+
+models.Tags.belongsToMany(models.Post, {
+  through: models.Foto_tag,
+  foreignKey: 'tag_id',
+});
+
+models.Foto_tag.belongsTo(models.Post, { foreignKey: 'post_id' });
+models.Foto_tag.belongsTo(models.Tags, { foreignKey: 'tag_id' });
+models.Post.hasMany(models.Foto_tag, { foreignKey: 'post_id', as: 'Foto_tag' });
+models.Tags.hasMany(models.Foto_tag, { foreignKey: 'tag_id' });
 
 module.exports = models;
 module.exports = sequelizeConnection;

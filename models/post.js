@@ -3,7 +3,8 @@ module.exports = (sequelize, DataTypes) => {
     post_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      allowNull: false
+      allowNull: false,
+      autoIncrement: true
     },
     user_id: {
       type: DataTypes.INTEGER,
@@ -16,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: true,
       },
     },
-    category: {
+    categoria_id: {
       type : DataTypes.INTEGER,
       allowNull: false
     },
@@ -38,10 +39,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     image: {
       type: DataTypes.TEXT,
-      allowNull: false
-    },
-    tags: {
-      type: DataTypes.INTEGER,
       allowNull: false
     },
     likes: {

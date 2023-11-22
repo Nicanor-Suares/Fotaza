@@ -1,15 +1,24 @@
+const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 
-let storage = multer.diskStorage({
-  destination : (req, file, cb) => {
-    cb(null, './users/avatars');
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const destinationPath = path.join(__dirname, '..', 'database', 'users', 'avatars');
+
+    // Create the directory if it doesn't exist
+    fs.mkdir(destinationPath, { recursive: true }, (err) => {
+      if (err) {
+        return cb(err, null);
+      }
+      cb(null, destinationPath);
+    });
   },
-  filename : (req, file, cb) => {
+  filename: (req, file, cb) => {
     cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-  }
+  },
 });
 
-let uploads = multer({storage : storage}).single('avatar');
+const uploads = multer({ storage: storage }).single('avatar');
 
 module.exports = uploads;
