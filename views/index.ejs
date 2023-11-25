@@ -24,7 +24,7 @@
             <div class="card mb-3" v-if="estado == estados.newPost">
               <div class="card-body">
                   <h5 class="card-title">Nuevo Post</h5>
-                <form @submit.prevent="createPost()">
+                <form @submit.prevent="createPost()" enctype="multipart/form-data">
                   <div class="mb-3">
                     <label for="postTitle" class="form-label">Título</label>
                     <input type="text" class="form-control" id="postTitle" placeholder="Enter title" v-model="post.title">
@@ -34,8 +34,8 @@
                     <textarea class="form-control" id="postDescription" rows="3" placeholder="Enter description" v-model="post.description"></textarea>
                   </div>
                   <div class="mb-3">
-                    <label for="postImage" class="form-label">Imágen</label>
-                    <input type="file" accept="image/*" class="form-control" refs="image" id="postImage" name="postImage" placeholder="Subir imágen" @change="subirImagen()" v-model="post.image">
+                    <label for="image" class="form-label">Imágen</label>
+                    <input type="file" name="image" ref="image" accept="image/*" @change="subirImagen" class="form-control" placeholder="Subir imágen" id="image" v-model="post.image">
                   </div>
                   <div class="row form-row">
                     <div class="col-md-4">

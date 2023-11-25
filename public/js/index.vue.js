@@ -15,7 +15,7 @@ const postDefault = {
   creation_date: '',
   format: '',
   rights: null,
-  image: '',
+	image: '',
   tags: [],
   likes: 0,
   watermark: '',
@@ -37,16 +37,12 @@ var vueApp = new Vue({
   },
   methods: {
     getUser() {
-      fetch("/users/13", {
+      fetch("/users/14", {
         method: "GET",
   
       }).then(response => response.json())
       .then(data => {
         this.usuario = data;
-        const imageUrl = this.usuario.avatar;
-        const imageName = imageUrl.split('\\').pop();
-        const url = '/avatars/' + imageName;
-        this.usuario.avatar = url;
       })
     },
     getAllPosts() {
@@ -55,28 +51,26 @@ var vueApp = new Vue({
       }).then(response => response.json())
       .then(data => {
         this.posts = data;
-        this.posts.forEach(post => {
-          const imageUrl = post.image;
-          const imageName = imageUrl.split('\\').pop();
-          const url = '/posts/' + imageName;
-          post.image = url;
-        });
-        this.posts.forEach(post => {
-          const imageUrl = post.Usuario.avatar;
-          const imageName = imageUrl.split('\\').pop();
-          const url = '/avatars/' + imageName;
-          post.Usuario.avatar = url;
-        });
         console.log(this.posts[0]);
       })
     },
     createPost() {
+      const formData = new FormData();
+      formData.append('user_id', '14');
+      formData.append('title', this.post.title);
+      formData.append('categoria_id', this.post.categoria_id);
+      formData.append('description', this.post.description);
+      formData.append('creation_date', new Date());
+      formData.append('format', 'jpg');
+      formData.append('rights', this.post.rights);
+      formData.append('image', this.post.image);
+      formData.append('tags', this.post.tags);
+      formData.append('likes', '0');
+      formData.append('watermark', 'aaa');
+
       fetch("/posts/create", {
         method: "POST",
-        body: JSON.stringify(this.post),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        body: formData,
       }).then(response => response.json())
       .then(data => {
         console.log(data);
@@ -85,7 +79,8 @@ var vueApp = new Vue({
       })
     },
     subirImagen(){
-      this.post.image = this.$refs.image.files[0];
+      const vm = this; 
+      vm.post.image = vm.$refs.image.files[0];
     },
     newPost() {
       this.estado = this.estados.newPost;

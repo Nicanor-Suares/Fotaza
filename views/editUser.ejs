@@ -9,29 +9,34 @@
     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
       <div class="container mt-5">
           <h2>Edit Profile</h2>
-          <form id="editProfileForm">
-            <div class="form-group">
-              <label for="nombre">Full Name:</label>
-              <input type="text" class="form-control" id="nombre" value="<%- user.nombre %>" placeholder="Enter your full name" required>
+
+          <div class="card">
+            <div class="card-body">
+              <form id="editProfileForm">
+                <div class="form-group">
+                  <label for="nombre">Full Name:</label>
+                  <input type="text" class="form-control" id="nombre" value="<%- user.nombre %>" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                  <label for="usuario">Username:</label>
+                  <input type="text" class="form-control" id="usuario" value="<%- user.usuario %>" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                  <label for="email">Email address:</label>
+                  <input type="email" class="form-control" id="email" value="<%- user.email %>" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                  <label for="password">New Password:</label>
+                  <input type="password" class="form-control" id="password" value="<%- user.password %>" placeholder="Enter your new password">
+                </div>
+                <div class="form-group">
+                  <label for="avatar">Avatar URL:</label>
+                  <input type="file" class="form-control" id="avatar" placeholder="Enter the URL of your avatar image" required>
+                </div>
+                <button type="button" @click="updateUser" class="btn btn-primary mt-3">Save Changes</button>
+              </form>
             </div>
-            <div class="form-group">
-              <label for="usuario">Username:</label>
-              <input type="text" class="form-control" id="usuario" value="<%- user.usuario %>" placeholder="Enter your username" required>
-            </div>
-            <div class="form-group">
-              <label for="email">Email address:</label>
-              <input type="email" class="form-control" id="email" value="<%- user.email %>" placeholder="Enter your email" required>
-            </div>
-            <div class="form-group">
-              <label for="password">New Password:</label>
-              <input type="password" class="form-control" id="password" value="<%- user.password %>" placeholder="Enter your new password">
-            </div>
-            <div class="form-group">
-              <label for="avatar">Avatar URL:</label>
-              <input type="file" class="form-control" id="avatar" placeholder="Enter the URL of your avatar image" required>
-            </div>
-            <button type="button" @click="updateUser" class="btn btn-primary mt-3">Save Changes</button>
-          </form>
+          </div>
         </div>
       </main>
     </div>

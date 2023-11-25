@@ -37,13 +37,9 @@ const postController = {
   createPost: (req, res) => {
     console.log('CREATE POST');
     try {
-      const user_id = 1;
-      const { title, categoria_id, description, image, rights } = req.body;
+      const { user_id, title, categoria_id, description, rights, format, watermark, likes} = req.body;
       const creation_date = new Date();
       //const formato
-      const format = 'jpg';
-      const watermark = 'aaa';
-      const likes = 100;
   
       if(title === '') {
         return res.status(400).json({ message: 'Por favor ingrese un título' });
@@ -53,22 +49,12 @@ const postController = {
         return res.status(400).json({ message: 'Por favor seleccione una categoría' });
       } 
   
-      const data = {
-        user_id,
-        title,
-        categoria_id,
-        description,
-        creation_date,
-        format,
-        rights,
-        image,
-        likes,
-        watermark
-      }
+      const imageUrl = req.file ? req.file.path : null;
+      const imageName = imageUrl.split('\\').pop();
+      const url = '/posts/' + imageName;
+      const imagePath = url;
   
-      console.log(data);
-
-      const newPost = postModel.create(data);
+      const newPost = postModel.create({user_id, title, categoria_id, description, creation_date, format, watermark, likes, image: imagePath, rights});
   
       if(newPost)
           res.json({ success: true });
