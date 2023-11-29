@@ -3,7 +3,8 @@ module.exports = (sequelize, DataTypes) => {
     cat_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      allowNull: false
+      allowNull: false,
+      autoIncrement: true
     },
     cat_nombre: {
       type : DataTypes.STRING,

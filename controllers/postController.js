@@ -20,7 +20,6 @@ const postController = {
         { model: tagsModel, as: 'Tags' },
       ],
     }).then(posts => {
-      console.log(posts)
       res.json(posts)
     })
     .catch(err => {
@@ -29,15 +28,27 @@ const postController = {
     return res;
   },
   getPost: (req, res) => {
-    
+    postModel.findOne({
+      where: { post_id: req.params.id },
+      include: [
+        { model: userModel, as: 'Usuario' },
+        { model: categoriasModel, as: 'Categorias' },
+        { model: tagsModel, as: 'Tags' },
+      ],
+    }).then(post => {
+      res.json(post)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+    return res;
   },
   showCreate: (req, res) => {
     
   },
   createPost: (req, res) => {
-    console.log('CREATE POST');
     try {
-      const { user_id, title, categoria_id, description, rights, format, watermark, likes} = req.body;
+      const { user_id, title, categoria_id, description, rights, watermark, likes} = req.body;
       const creation_date = new Date();
       //const formato
   
@@ -53,6 +64,9 @@ const postController = {
       const imageName = imageUrl.split('\\').pop();
       const url = '/posts/' + imageName;
       const imagePath = url;
+
+      const formatMatch = imageName.match(/\.([a-zA-Z0-9]+)$/);
+      const format = formatMatch ? formatMatch[1] : null;
   
       const newPost = postModel.create({user_id, title, categoria_id, description, creation_date, format, watermark, likes, image: imagePath, rights});
   
@@ -67,8 +81,15 @@ const postController = {
   updatePost: (req, res) => {
     
   },
-  deletePost: (req, res) => {
-    
+  deletePost: async (req, res) => {
+    try {
+      const { id } = req.params;
+      await postModel.destroy({ where: { post_id: id } });
+      res.json({ success: true });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, error: 'An error occurred while deleting the post.' });
+    }
   },
 
   //Categorías y etiquetas

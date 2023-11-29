@@ -16,7 +16,7 @@ console.log(models);
 
 //Associations
 models.Usuario.hasMany(models.Post);
-models.Post.belongsTo(models.Usuario, { foreignKey: 'user_id' });
+models.Post.belongsTo(models.Usuario, { foreignKey: 'user_id', unique: false },);
 
 models.Categorias.hasMany(models.Post, { foreignKey: 'categoria_id', timestamps: false });
 models.Post.belongsTo(models.Categorias, { foreignKey: 'categoria_id', as: 'Categorias', timestamps: false });

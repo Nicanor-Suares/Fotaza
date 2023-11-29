@@ -34,6 +34,8 @@ var vueApp = new Vue({
     posts: [],
     categories: [],
     tags: [],
+    postToDelete: null,
+    postToEdit: null,
   },
   methods: {
     getUser() {
@@ -51,17 +53,17 @@ var vueApp = new Vue({
       }).then(response => response.json())
       .then(data => {
         this.posts = data;
-        console.log(this.posts[0]);
+        console.log(this.posts);
       })
     },
     createPost() {
       const formData = new FormData();
-      formData.append('user_id', '14');
+      formData.append('user_id', '1');
       formData.append('title', this.post.title);
       formData.append('categoria_id', this.post.categoria_id);
       formData.append('description', this.post.description);
       formData.append('creation_date', new Date());
-      formData.append('format', 'jpg');
+      formData.append('format', '');
       formData.append('rights', this.post.rights);
       formData.append('image', this.post.image);
       formData.append('tags', this.post.tags);
@@ -79,6 +81,7 @@ var vueApp = new Vue({
       })
     },
     subirImagen(){
+      console.log('subir imagen');
       const vm = this; 
       vm.post.image = vm.$refs.image.files[0];
     },
@@ -108,6 +111,71 @@ var vueApp = new Vue({
         this.tags = data;
       })
     },
+    abrirModalBorrar(post_id){
+      event.preventDefault();
+      this.postToDelete = post_id;
+      $('#deleteConfirmationModal').modal('show');
+    },
+    deletePost(){
+      fetch(`/posts/delete/${this.postToDelete}`, {
+        method: "delete",
+      }).then(response => response.json())
+      .then(data => {
+        if(data.success){
+          this.cerrarModalBorrar();
+          this.getAllPosts();
+        }
+      })
+    },
+    cerrarModalBorrar(){
+      // event.preventDefault();
+      $('#deleteConfirmationModal').modal('hide');
+    },
+    abrirModalEditar(post_id){
+      event.preventDefault();
+      this.getCategories();
+      this.getTags();
+      fetch(`/posts/get/${post_id}`, {
+        method: "GET",
+      }).then(response => response.json())
+      .then(data => {
+        this.postToEdit = data;
+        console.log('postToEdit', this.postToEdit);
+        console.log('tags', this.postToEdit.Tags[0].tag_id);
+      })
+      $('#editPostModal').modal('show');
+    },
+    editPost(){
+      const formData = new FormData();
+      formData.append('post_id', this.post.post_id);
+      formData.append('user_id', '1');
+      formData.append('title', this.post.title);
+      formData.append('categoria_id', this.post.categoria_id);
+      formData.append('description', this.post.description);
+      formData.append('creation_date', new Date());
+      formData.append('format', '');
+      formData.append('rights', this.post.rights);
+      formData.append('image', this.post.image);
+      formData.append('tags', this.post.tags);
+      formData.append('likes', '0');
+      formData.append('watermark', 'aaa');
+
+      fetch("/posts/edit", {
+        method: "POST",
+        body: formData,
+      }).then(response => response.json())
+      .then(data => {
+        if(data.success){
+          this.cerrarModalEditar();
+          this.getAllPosts();
+        }
+      })
+    }
+    ,
+    cerrarModalEditar(){
+      // event.preventDefault();
+      $('#editPostModal').modal('hide');
+    }
   },
   mounted() {
     this.getUser();

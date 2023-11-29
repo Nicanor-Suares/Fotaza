@@ -7,36 +7,43 @@
 
   <div id="app">
     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-      <div class="container mt-5">
+      <div class="container mt-5 mb-5">
           <h2>Edit Profile</h2>
-
           <div class="card">
             <div class="card-body">
-              <form id="editProfileForm">
+              <form @submit.prevent="updateUser()" enctype="multipart/form-data">
                 <div class="form-group">
                   <label for="nombre">Full Name:</label>
-                  <input type="text" class="form-control" id="nombre" value="<%- user.nombre %>" placeholder="Enter your full name" required>
+                  <input type="text" class="form-control" id="nombre" value="<%- user.nombre %>" placeholder="Enter your full name" required v-model="user.nombre">
                 </div>
                 <div class="form-group">
                   <label for="usuario">Username:</label>
-                  <input type="text" class="form-control" id="usuario" value="<%- user.usuario %>" placeholder="Enter your username" required>
+                  <input type="text" class="form-control" id="usuario" value="<%- user.usuario %>" placeholder="Enter your username" required v-model="user.usuario">
                 </div>
                 <div class="form-group">
                   <label for="email">Email address:</label>
-                  <input type="email" class="form-control" id="email" value="<%- user.email %>" placeholder="Enter your email" required>
+                  <input type="email" class="form-control" id="email" value="<%- user.email %>" placeholder="Enter your email" required v-model="user.email">
                 </div>
                 <div class="form-group">
                   <label for="password">New Password:</label>
-                  <input type="password" class="form-control" id="password" value="<%- user.password %>" placeholder="Enter your new password">
+                  <input type="password" class="form-control" id="password" value="<%- user.password %>" placeholder="Enter your new password" required v-model="user.password">
                 </div>
                 <div class="form-group">
-                  <label for="avatar">Avatar URL:</label>
-                  <input type="file" class="form-control" id="avatar" placeholder="Enter the URL of your avatar image" required>
+                  <img class="img-fluid mt-3 mb-3" src="<%- user.avatar %>" alt="">
                 </div>
-                <button type="button" @click="updateUser" class="btn btn-primary mt-3">Save Changes</button>
+                <div class="form-group">
+                  <label for="avatar">Avatar:</label>
+                  <input type="file" name="avatar" ref="avatar" accept="image/*"  @change="subirImagen" class="form-control" placeholder="Cambiar foto de perfil" id="avatar">
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">Editar usuario</button>
               </form>
             </div>
           </div>
+        </div>
+
+        <div>
+          <button class="btn btn-outline-danger" @click="deleteUser()">Eliminar usuario</button>
         </div>
       </main>
     </div>

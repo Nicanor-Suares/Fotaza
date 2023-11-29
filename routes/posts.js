@@ -4,7 +4,8 @@ const postController = require('../controllers/postController');
 const postUpload = require('../libs/posts');
 
 //Posts ABM
-router.get('/getAll', postController.getAllPosts);
+router.get('/getAll', postController.getAllPosts); 
+router.get('/get/:id', postController.getPost);
 router.post('/create', postUpload, postController.createPost);
 router.put('/update/:id', postUpload, postController.updatePost);
 router.delete('/delete/:id', postController.deletePost);

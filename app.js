@@ -14,7 +14,7 @@ const sequelizeConnection = require('./models/index');
 
 const app = express();
 
-sequelizeConnection.sync();
+sequelizeConnection.sync({ force: false });
 
 app.set('view engine', 'ejs');
 

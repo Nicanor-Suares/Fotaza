@@ -6,6 +6,7 @@ const userUpload = require('../libs/users');
 router.get('/:id', userController.getUser);
 
 router.get('/edit/:id', userController.showEditUser);
+router.post('/edit/:id', userUpload, userController.editUser);
 
 //router.post('/edituser/:id', userController.editUser);
 
