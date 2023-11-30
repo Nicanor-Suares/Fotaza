@@ -10,18 +10,33 @@
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
               <h1 class="h2">Inicio</h1>
               <div class="btn-toolbar mb-2 mb-md-0">
-                <div class="btn-group me-2">
+                <div class="btn-group">
                   <button type="button" class="btn btn-sm btn-outline-primary" @click="newPost()">Nuevo Post</button>
+                  
+                  <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span data-feather="calendar"></span>
+                    Fecha
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" @click="sortBy('recent')">Más recientes</a></li>
+                    <li><a class="dropdown-item" href="#" @click="sortBy('old')">Más antiguos</a></li>
+                  </ul>
+                  
+                  <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span data-feather="calendar"></span>
+                    Categoria
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" @click="filterByCategory('all')">Todas las categorías</a></li>
+                    <li><a class="dropdown-item" href="#" @click="filterByCategory(1)">Memes</a></li>
+                    <li><a class="dropdown-item" href="#" @click="filterByCategory(2)">Comida</a></li>
+                  </ul>
                 </div>
-                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
-                  <span data-feather="calendar"></span>
-                  This week
-                </button>
               </div>
             </div>
 
             <!-- New Post -->
-            <div class="card" v-if="estado == estados.newPost">
+            <div class="card mb-3" style="margin-bottom: 1rem;" v-if="estado == estados.newPost">
               <div class="card-body">
                   <h5 class="card-title">Nuevo Post</h5>
                 <form @submit.prevent="createPost()" enctype="multipart/form-data">
@@ -40,6 +55,18 @@
                   <div class="row form-row">
                     <div class="col-md-4">
                       <div class="form-group">
+                        <div class="mb-3">
+                          <label for="postRights" class="form-label">Derechos</label>
+                          <select name="postRights" id="postRights" class="form-control" v-model="post.rights">
+                            <option value="" disabled>Seleccionar Derechos</option>
+                            <option value="0">Público</option>
+                            <option value="1">Protegido</option>
+                          </select>
+                        </div>
+                      </div>                      
+                    </div>
+                    <div class="col-md-4">
+                      <div class="form-group">
                         <div>
                           <label for="postCategory" class="form-label">Categoría</label>
                           <select name="postCategory" id="postCategory"  class="form-control" v-model="post.categoria_id">
@@ -53,29 +80,19 @@
                     </div>
                     <div class="col-md-4">
                       <div class="form-group">
-                        <div class="mb-3">
-                          <label for="postTags" class="form-label">Tags</label>
-                          <select name="postTags" id="postTags" class="form-control" v-model="post.tags">
-                            <option value="" disabled>Seleccionar Tags</option>
-                            <option v-for="tag in tags" :value="tag.tag_id">
-                              {{ tag.tag_nombre }}
-                            </option>
-                          </select>
-                        </div>
-                      </div>                      
-                    </div> 
-                    <div class="col-md-4">
-                      <div class="form-group">
-                        <div class="mb-3">
-                          <label for="postRights" class="form-label">Rights</label>
-                          <select name="postRights" id="postRights" class="form-control" v-model="post.rights">
-                            <option value="" disabled>Seleccionar Derechos</option>
-                            <option value="0">Público</option>
-                            <option value="1">Protegido</option>
-                          </select>
-                        </div>
-                      </div>                      
-                    </div>      
+                          <label for="tags">Selecciona hasta 3 tags:</label>
+                          <div v-for="tag in tags" :key="tag.tag_id">
+                            <input
+                              type="checkbox"
+                              :id="'tag-' + tag.tag_id"
+                              :value="tag.tag_id"
+                              v-model="selectedTags"
+                              @change="handleTagSelection"
+                            />
+                            <label :for="'tag-' + tag.tag_id">{{ tag.tag_nombre }}</label>
+                          </div>
+                        </div>                     
+                      </div>     
                   </div>
                   <button type="button" class="btn btn-secondary" @click="cancelPost()">Cancelar</button>
                   <button type="submit" class="btn btn-primary">Add Post</button>
@@ -104,8 +121,8 @@
                       &#8942;
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                      <a class="dropdown-item" href="#" @click="abrirModalEditar(post.post_id)">Edit</a>
-                      <a class="dropdown-item" href="" @click="abrirModalBorrar(post.post_id)">Delete</a>
+                      <a class="dropdown-item" href="#" @click="abrirModalEditar(post.post_id)">Editar</a>
+                      <a class="dropdown-item" href="" @click="abrirModalBorrar(post.post_id)">Eliminar</a>
                     </div>
                   </div>
                 </div>
@@ -176,10 +193,22 @@
                           <div class="row form-row">
                             <div class="col-md-4">
                               <div class="form-group">
+                                <div class="mb-3">
+                                  <label for="postRightsEdit" class="form-label">Derechos</label>
+                                  <select name="postRightsEdit" id="postRightsEdit" class="form-control" v-model="postToEdit.rights">
+                                    <option value="" disabled>Seleccionar Derechos</option>
+                                    <option value="0">Público</option>
+                                    <option value="1">Protegido</option>
+                                  </select>
+                                </div>
+                              </div>                      
+                            </div>   
+                            <div class="col-md-4">
+                              <div class="form-group">
                                 <div>
                                   <label for="postCategoryEdit" class="form-label">Categoría</label>
                                   <select name="postCategoryEdit" id="postCategoryEdit"  class="form-control" v-model="postToEdit.categoria_id">
-                                    <option value="0" disabled>Seleccionar Categoria</option>
+                                    <option value="0" disabled>Seleccionar Categoría</option>
                                     <option v-for="category in categories" :value="category.cat_id" v-bind:selected="category.cat_id === postToEdit.categoria_id">
                                       {{ category.cat_nombre }}
                                     </option>
@@ -190,37 +219,30 @@
                             <div class="col-md-4">
                               <div class="form-group">
                                 <div class="mb-3">
-                                  <label for="postTagsEdit" class="form-label">Tags</label>
-                                  <select name="postTagsEdit" id="postTagsEdit" class="form-control" v-model="postToEdit.tags">
-                                    <option value="" disabled>Seleccionar Tags</option>
-                                    <option v-for="(tag, index) in tags" :value="tag.tag_id" v-bind:selected="tag.tag_id === postToEdit.Tags[index]?.tag_id">
-                                      {{ tag.tag_nombre }}
-                                    </option>
-                                  </select>
+                                  <label class="form-label">Tags</label>
+                                  <div v-for="tag in tags" :key="tag.tag_id">
+                                    <div class="form-check">
+                                      <input
+                                      type="checkbox"
+                                      class="form-check-input"
+                                      :id="`tagCheckbox_${tag.tag_id}`"
+                                      :value="tag.tag_id"
+                                      v-model="selectedTags"
+                                      :checked="postToEdit.Tags ? postToEdit.Tags.some(t => t.tag_id === tag.tag_id) : false"
+                                      />
+                                      <label class="form-check-label" :for="`tagCheckbox_${tag.tag_id}`">{{ tag.tag_nombre }}</label>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>                      
-                            </div> 
-                            <div class="col-md-4">
-                              <div class="form-group">
-                                <div class="mb-3">
-                                  <label for="postRightsEdit" class="form-label">Rights</label>
-                                  <select name="postRightsEdit" id="postRightsEdit" class="form-control" v-model="postToEdit.rights">
-                                    <option value="" disabled>Seleccionar Derechos</option>
-                                    <option value="0">Público</option>
-                                    <option value="1">Protegido</option>
-                                  </select>
-                                </div>
-                              </div>                      
-                            </div>      
+                              </div>
+                            </div>
                           </div>
-                          <button type="button" class="btn btn-secondary" @click="cancelPost()">Cancelar</button>
-                          <button type="submit" class="btn btn-primary">Add Post</button>
                         </form>
                   </div>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary" @click="editPost">Save changes</button>
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-primary" @click="editPost">Guardar cambios</button>
                 </div>
               </div>
             </div>

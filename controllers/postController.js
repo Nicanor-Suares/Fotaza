@@ -46,11 +46,11 @@ const postController = {
   showCreate: (req, res) => {
     
   },
-  createPost: (req, res) => {
+  createPost: async (req, res) => {
     try {
-      const { user_id, title, categoria_id, description, rights, watermark, likes} = req.body;
+      const { user_id, title, categoria_id, description, rights, watermark, likes, tags} = req.body;
       const creation_date = new Date();
-      //const formato
+      let success = false;
   
       if(title === '') {
         return res.status(400).json({ message: 'Por favor ingrese un título' });
@@ -68,29 +68,63 @@ const postController = {
       const formatMatch = imageName.match(/\.([a-zA-Z0-9]+)$/);
       const format = formatMatch ? formatMatch[1] : null;
   
-      const newPost = postModel.create({user_id, title, categoria_id, description, creation_date, format, watermark, likes, image: imagePath, rights});
+      let newPost = await postModel.create({user_id, title, categoria_id, description, creation_date, format, watermark, likes, image: imagePath, rights});
   
-      if(newPost)
-          res.json({ success: true });
+      console.log('New post created:', newPost);
+
+      if(newPost){
+        if (tags && tags.length > 0) {
+          console.log('Adding tags to post...');
+          console.log('Tags:', tags);
+
+          let post = await postModel.findOne({ where: { post_id: newPost.post_id } });
+
+          for (const tagId of tags) {
+            const tagInstance = await tagsModel.findByPk(tagId);
+            if (tagInstance) {
+              await post.addTags(tagInstance);
+            }
+          }
+
+          success = true;
+        }
+      }
+
+      if(success)
+        res.json({ success: true });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Post upload failed' });
     }
-
   },
+
   updatePost: (req, res) => {
     
   },
   deletePost: async (req, res) => {
     try {
       const { id } = req.params;
+      
+      const post = await postModel.findByPk(id, { include: 'Tags' });
+  
+      if (!post) {
+        return res.status(404).json({ success: false, error: 'Post not found.' });
+      }
+  
+      // Borrar tags
+      if (post.Tags && post.Tags.length > 0) {
+        await post.removeTags(post.Tags);
+      }
+  
       await postModel.destroy({ where: { post_id: id } });
+  
       res.json({ success: true });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ success: false, error: 'An error occurred while deleting the post.' });
+      res.status(500).json({ success: false, error: 'Ocurrió un error al eliminar el post.' });
     }
   },
+  
 
   //Categorías y etiquetas
   getCategories: (req, res) => {

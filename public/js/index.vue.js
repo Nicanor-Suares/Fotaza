@@ -14,7 +14,7 @@ const postDefault = {
   description: '',
   creation_date: '',
   format: '',
-  rights: null,
+  rights: 0,
 	image: '',
   tags: [],
   likes: 0,
@@ -32,8 +32,10 @@ var vueApp = new Vue({
     usuario: JSON.parse(JSON.stringify(userDefault)),
     post: JSON.parse(JSON.stringify(postDefault)),
     posts: [],
+    allPosts: [],
     categories: [],
     tags: [],
+    selectedTags: [],
     postToDelete: null,
     postToEdit: null,
   },
@@ -53,8 +55,24 @@ var vueApp = new Vue({
       }).then(response => response.json())
       .then(data => {
         this.posts = data;
+        this.allPosts = data;
         console.log(this.posts);
       })
+    },
+    sortBy(order) {
+      if (order === 'recent') {
+        this.posts.sort((a, b) => b.post_id - a.post_id); // Sort by post_id in descending order (most recent first)
+
+      } else if (order === 'old') {
+        this.posts.sort((a, b) => a.post_id - b.post_id); // Sort by post_id in ascending order (oldest first)
+      }
+    },
+    filterByCategory(categoryId) {
+      if (categoryId === 'all') {
+        this.posts = this.allPosts;
+      } else {
+        this.posts = this.allPosts.filter(post => post.categoria_id === categoryId);
+      }
     },
     createPost() {
       const formData = new FormData();
@@ -66,7 +84,7 @@ var vueApp = new Vue({
       formData.append('format', '');
       formData.append('rights', this.post.rights);
       formData.append('image', this.post.image);
-      formData.append('tags', this.post.tags);
+      formData.append('tags', this.selectedTags);
       formData.append('likes', '0');
       formData.append('watermark', 'aaa');
 
@@ -75,9 +93,11 @@ var vueApp = new Vue({
         body: formData,
       }).then(response => response.json())
       .then(data => {
-        console.log(data);
-        this.estado = 0;
-        this.getAllPosts();
+        if(data.success) {
+          console.log(data);
+          this.estado = 0;
+          window.location.href = '/';
+        }
       })
     },
     subirImagen(){
@@ -111,6 +131,11 @@ var vueApp = new Vue({
         this.tags = data;
       })
     },
+    handleTagSelection() {
+      if (this.selectedTags.length > 3) {
+        this.selectedTags.pop();
+      }
+    },
     abrirModalBorrar(post_id){
       event.preventDefault();
       this.postToDelete = post_id;
@@ -140,8 +165,11 @@ var vueApp = new Vue({
       }).then(response => response.json())
       .then(data => {
         this.postToEdit = data;
-        console.log('postToEdit', this.postToEdit);
-        console.log('tags', this.postToEdit.Tags[0].tag_id);
+        
+        if (this.postToEdit.Tags.some(tag => tag.tag_id === (this.tags[0] && this.tags[0].tag_id))) {
+          console.log("It's included");
+        }        
+        
       })
       $('#editPostModal').modal('show');
     },
@@ -180,5 +208,5 @@ var vueApp = new Vue({
   mounted() {
     this.getUser();
     this.getAllPosts();
-  }
+  },
 })
