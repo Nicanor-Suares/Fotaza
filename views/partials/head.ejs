@@ -24,4 +24,8 @@
     <script type="module" defer src="/js/<%=script%>.vue.js"></script>
   <%}}%>
 
+  <script>
+    const user_id = Number("<%= user_id %>") || null
+  </script>
+
 </head>

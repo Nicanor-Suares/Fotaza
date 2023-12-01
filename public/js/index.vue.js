@@ -40,31 +40,52 @@ var vueApp = new Vue({
     selectedTags: [],
     postToDelete: null,
     postToEdit: null,
+    isAuthenticated: false,
+    loggedUser_id: user_id
   },
   methods: {
-    getUser() {
-      fetch("/users/14", {
-        method: "GET",
-  
-      }).then(response => response.json())
-      .then(data => {
-        this.usuario = data;
-      })
+    async getUser() {
+      try {
+        if (!user_id) {
+          this.isAuthenticated = false;
+        } else {
+          const response = await fetch(`/users/${user_id}`, { method: "GET" });
+          const data = await response.json();
+          this.usuario = data;
+          this.isAuthenticated = true;
+        }
+    
+        await this.postsAuth(this.isAuthenticated);
+      } catch (error) {
+        console.error(error);
+      }
     },
-    getAllPosts() {
-      fetch("/posts/getAll", {
-        method: "GET",
-      }).then(response => response.json())
-      .then(data => {
-        this.posts = data;
-        this.allPosts = data;
-        console.log(this.posts);
-      })
+    async getAllPosts() {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await fetch("/posts/getAll", { method: "GET" });
+          const data = await response.json();
+          this.posts = data;
+          this.allPosts = data;
+          resolve();
+        } catch (error) {
+          console.error(error);
+          reject(error);
+        }
+      });
     },
     async getPost(post_id) {
       return fetch(`/posts/getPost/${post_id}`, {
         method: "GET",
       }).then(response => response.json());
+    },
+    async postsAuth(isAuthenticated) {
+      await this.getAllPosts();
+      if(isAuthenticated) {
+        this.posts = this.allPosts;
+      } else {
+        this.posts = this.allPosts.filter(post => post.rights === 0);
+      }
     },
     sortBy(order) {
       if (order === 'recent') {
@@ -101,14 +122,12 @@ var vueApp = new Vue({
       }).then(response => response.json())
       .then(data => {
         if(data.success) {
-          console.log(data);
           this.estado = 0;
           window.location.href = '/';
         }
       })
     },
     subirImagen(){
-      console.log('subir imagen');
       const vm = this; 
       vm.post.image = vm.$refs.image.files[0];
     },
@@ -118,7 +137,6 @@ var vueApp = new Vue({
       this.getTags();
     },
     cancelPost() {
-      console.log('cancelar');
       this.estado = 0;
       this.post = JSON.parse(JSON.stringify(postDefault));
     },
@@ -143,7 +161,23 @@ var vueApp = new Vue({
         const data = await response.json();
     
         if (data.success) {
-          console.log(data);
+          this.estado = 0;
+          window.location.href = '/';
+        }
+      } catch (error) {
+        console.error(error);
+        // Handle error
+      }
+    },    
+    async deleteComment(post_id) {
+      try {    
+        const response = await fetch(`/posts/deleteComment/${post_id}`, {
+          method: "delete",
+        });
+    
+        const data = await response.json();
+    
+        if (data.success) {
           this.estado = 0;
           window.location.href = '/';
         }
@@ -195,7 +229,6 @@ var vueApp = new Vue({
     },
     abrirModalEditar(post_id){
       event.preventDefault();
-      console.log('hola');
       this.getCategories();
       this.getTags();
       fetch(`/posts/getPost/${post_id}`, {
@@ -205,7 +238,6 @@ var vueApp = new Vue({
         this.postToEdit = data;
         
         if (this.postToEdit.Tags.some(tag => tag.tag_id === (this.tags[0] && this.tags[0].tag_id))) {
-          console.log("It's included");
         }      
       })
       $('#editPostModal').modal('show');
@@ -244,6 +276,5 @@ var vueApp = new Vue({
   },
   mounted() {
     this.getUser();
-    this.getAllPosts();
   },
 })

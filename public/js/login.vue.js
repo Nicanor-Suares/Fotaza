@@ -41,9 +41,9 @@ var vueApp = new Vue({
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            window.location.href = '/auth/login';
+            window.location.href = '/';
           } else {
-            console.log(error);
+            console.error(error);
           }
         })
         .catch(error => {
@@ -64,10 +64,10 @@ var vueApp = new Vue({
       })
       .then(response => response.json())
       .then(data => {
-        if (data.success && data.token) {
+        if (data.success) {
           window.location.href = '/';
         } else {
-          console.log("Error:", data.error);
+          console.error("Error:", data.error);
         }
       }).catch(error => {
         console.error("Algo salio mal", error);

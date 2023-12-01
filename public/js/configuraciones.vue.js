@@ -5,7 +5,6 @@ var vueApp = new Vue({
   },
   methods: {
     updateUser() {
-      console.log(this.user);
       const formData = new FormData();
       formData.append('user_id', this.user.user_id);
       formData.append('usuario', this.user.usuario);
@@ -25,7 +24,7 @@ var vueApp = new Vue({
               window.location.href = data.redirectTo;
             }
           } else {
-            console.log(error);
+            console.error(error);
           }
         })
         .catch(error => {
@@ -33,7 +32,6 @@ var vueApp = new Vue({
         });
     },
     subirImagen(){
-      console.log('subir imagen');
       const vm = this; 
       vm.user.avatar = vm.$refs.avatar.files[0];
     },

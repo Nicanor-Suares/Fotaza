@@ -30,7 +30,6 @@ const postController = {
     return res;
   },
   getPost: (req, res) => {
-    console.log('ID POST GET', req.params.id);
     postModel.findOne({
       where: { post_id: req.params.id },
       include: [
@@ -71,12 +70,9 @@ const postController = {
   
       let newPost = await postModel.create({user_id, title, categoria_id, description, creation_date, format, watermark, likes, image: imagePath, rights});
   
-      console.log('New post created:', newPost);
-
       if(newPost){
         if (tags && tags.length > 0) {
           console.log('Adding tags to post...');
-          console.log('Tags:', tags);
 
           let post = await postModel.findOne({ where: { post_id: newPost.post_id } });
 
@@ -146,7 +142,6 @@ const postController = {
 
   //Comentarios
   addComment: (req, res) => {
-    console.log('BODY', req.body);
     const { post_id, user_id, comentario } = req.body;
 
     fotoComentModel.create({

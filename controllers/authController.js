@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const userUpload = require('../libs/users');
 const {models} = require('../models/index');
 const userModel = models.Usuario;
+const passport = require("passport");
+const promisify = require('util').promisify;
 
 const saltRounds = 10;
 
@@ -11,36 +13,31 @@ const authController = {
   showRegister: (req, res) => {
     res.render('register', {title: 'Registro - Fotaza', scripts: ['login']});
   },
-  register: async (req, res) => {
+  register: async (req, res, next) => {
     try {
-      const {nombre, usuario, email, password, confirm_password } = req.body;
 
-      //Validaciones
-      const existingUsername = await userModel.findOne({ where: { usuario } });
-      const existingEmail = await userModel.findOne({ where: { email } });
+      passport.authenticate('signup', {session: false}, async (err, user, info) => {
+        if (err) {
+          return next(err);
+        }
+        if (!user) {
+          return res.status(400).json({ message: 'Invalid user data' });
+        }
+        req.login(user, {session: false}, async (err) => {
+          if (err) {
+            return next(err);
+          }
+          const token = jwt.sign({ id: user.user_id }, 'secret');
+          const cookieOptions = {
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            httpOnly: true
+          }
 
-      if (existingUsername) {
-        return res.status(400).json({ message: 'Ya existe un usuario con ese username' });
-      }
+          res.cookie('jwt', token, cookieOptions);
 
-      if (existingEmail) {
-        return res.status(400).json({ message: 'Ya hay un usuario registrado con ese email' });
-      }
-
-      if(password !== confirm_password)
-        return res.status(400).json({ message: 'Las contraseñas no coinciden' });
-
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-      const imageUrl = req.file ? req.file.path : null;
-      const imageName = imageUrl.split('\\').pop();
-      const url = '/avatars/' + imageName;
-      const avatarPath = url;
-
-      const newUser = await userModel.create({ nombre, usuario, email, password: hashedPassword, avatar: avatarPath });
-
-      if(newUser)
-        res.json({ success: true });
+          res.json({ success: true });
+        });
+      })(req, res, next);
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Registration failed' });
@@ -49,49 +46,39 @@ const authController = {
   showLogin: (req, res) => {
     res.render('login', {title: 'Login - Fotaza', scripts: ['login']});
   },
-  login: async (req, res) => {
+  login: async (req, res, next) => {
     try {
-      console.log('DATA', req.body);
-      const { email, password } = req.body;
+      passport.authenticate('login', {session: false}, async (err, user, info) => {
+        if (err) {
+          return next(err);
+        }
+        if (!user) {
+          return res.status(400).json({ message: 'Invalid user data' });
+        }
+        req.login(user, {session: false}, async (err) => {
+          if (err) {
+            return next(err);
+          }
+          const token = jwt.sign({ id: user.user_id }, 'secret');
+          const cookieOptions = {
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            httpOnly: true
+          }
 
-      // Find the user with the provided email
-      const user = await userModel.findOne({ where: { email } }).catch(error => {
-        console.error(error);
-        return res.status(500).json({ message: 'Failed to get user' });
-      });
+          res.cookie('jwt', token, cookieOptions);
 
-      if (!user || !(await bcrypt.compare(password, user.password))) {
-        return res.status(401).json({ message: 'Invalid email or password' });
-      }
-
-      const jwtToken = jwt.sign({ id: user.id, email: user.email }, 'secret');
-
-      const cookieOptions = {
-				expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-				httpOnly: true
-			}
-
-			res.cookie('jwt', jwtToken, cookieOptions);
-      // Redirect or send a success response
-      res.json({ message: "Login successful", success: true, token: jwtToken });
+          res.json({ message: "Login successful", success: true });
+        });
+      })(req, res, next);
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Login failed' });
     }
   },
   logout: (req, res) => {
-    try {
-      // Clear the user's session or token (depending on your authentication method)
-      req.session.destroy(); // If you're using session-based authentication
-      // or
-      // Remove the user's token (if using token-based authentication)
-
-      // Redirect or send a success response
-      res.redirect('/auth/login'); // Redirect to the login page after logout
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Logout failed' });
-    }
+    res.clearCookie('jwt')
+    req.session ? req.session.destroy() : ''
+    return res.redirect('/auth/login')
   },
   showHome: (req, res) => {
     try {
@@ -107,6 +94,31 @@ const authController = {
       res.status(500).json({ message: 'Failed to load home page' });
     }
   },
+  getUserId: async (req, res, next) => {
+    res.locals.user_id = null;
+
+    if (req.cookies.jwt) {
+      const decodificada = await promisify(jwt.verify)(req.cookies.jwt, 'secret');
+      const user = await userModel.findByPk(decodificada.id);
+      if (user) res.locals.user_id = decodificada.id
+    }
+
+    return next()
+  },
+  
+  isAuthenticated: async (req, res, next) => {
+      if (!req.cookies.jwt)
+        return res.redirect('/auth/login')
+    
+      const decodificada = await promisify(jwt.verify)(req.cookies.jwt, 'secret')
+    
+      const user = await userModel.findByPk(decodificada.id)
+    
+      if (user == null) return next()
+    
+      req.user = user
+      return next()
+  }
 }
 
 module.exports = authController;

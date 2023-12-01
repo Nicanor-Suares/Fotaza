@@ -11,8 +11,7 @@
               <h1 class="h2">Inicio</h1>
               <div class="btn-toolbar mb-2 mb-md-0">
                 <div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-outline-primary" @click="newPost()">Nuevo Post</button>
-                  
+                  <button v-if="isAuthenticated" type="button" class="btn btn-sm btn-outline-primary" @click="newPost()">Nuevo Post</button>
                   <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     <span data-feather="calendar"></span>
                     Fecha
@@ -108,7 +107,7 @@
                   <img :src="post.Usuario.avatar" class="rounded-circle" width="50" alt="">
                   <a class="text-decoration-none text-dark me-2" href="#"> {{ post.Usuario.usuario }} </a>
                   <h5>{{ post.title }}</h5>
-                  <div class="dropdown ms-auto">
+                  <div class="dropdown ms-auto" v-if="isAuthenticated && post.Usuario.user_id == loggedUser_id">
                     <button
                       class="btn btn-light"
                       type="button"
@@ -136,6 +135,7 @@
                   <p class="card-text">By {{ post.autor }} on {{ post.creation_date }}</p>
                   <!-- Likes -->
                   <p class="card-text">{{ post.likes }} Likes</p>
+                  <p class="card-text">{{ post.rights }} Rights</p>
                 </div>
               
                 <div class="card-footer">
@@ -149,13 +149,17 @@
                   </div>
 
                   <div>
-                    <h6>Comments</h6>
+                    <h6>Comentarios</h6>
                     <div v-for="comment in post.Foto_comentarios" :key="comment.comentario_id">
-                      <p>{{ comment.Usuario.usuario }}: {{ comment.comentario }}</p>
+                      <p>
+                        {{ comment.Usuario.usuario }}: {{ comment.comentario }}
+                        <!-- Add Delete Button for Comments -->
+                        <button v-if="isAuthenticated && comment.Usuario.user_id == loggedUser_id || isAuthenticated && comment.Usuario.user_id == post.Usuario.user_id" @click="deleteComment(comment.comentario_id)">Eliminar</button>
+                      </p>
                     </div>
                     
                     <!-- Add Comment Form -->
-                    <form @submit.prevent="addComment(post.post_id)">
+                    <form v-if="isAuthenticated" @submit.prevent="addComment(post.post_id)">
                       <div class="mb-3">
                         <label for="commentInput" class="form-label">Añadir comentario:</label>
                         <input type="text" class="form-control" id="commentInput" v-model="newComment">

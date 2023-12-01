@@ -33,9 +33,6 @@ const userController = {
     }
 
     if(req.file) {
-      console.log('EDIT USER - FILE');
-      console.log('BODY', req.body);
-
       const imageUrl = req.file ? req.file.path : null;
       const imageName = imageUrl.split(path.sep).pop();
       const url = '/avatars/' + imageName;
@@ -46,7 +43,6 @@ const userController = {
 
 
       const oldAvatarPath = path.join(__dirname, '..', 'avatars', oldUser.avatar);
-      console.log('OLD AVATAR PATH', oldAvatarPath);
       
       try {
         fs.unlinkSync(oldAvatarPath);

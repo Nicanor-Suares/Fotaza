@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const postController = require('../controllers/postController');
+const authController = require('../controllers/authController');
 const postUpload = require('../libs/posts');
 
 //Posts ABM
 router.get('/getAll', postController.getAllPosts); 
 router.get('/getPost/:id', postController.getPost);
-router.post('/create', postUpload, postController.createPost);
+router.post('/create', postUpload, authController.isAuthenticated, postController.createPost);
 router.put('/update/:id', postUpload, postController.updatePost);
 router.delete('/delete/:id', postController.deletePost);
 //router.get('/get/:id', postController.getPost);
@@ -18,5 +19,6 @@ router.get('/getTags', postController.getTags);
 
 //Comments
 router.post('/addComment', postController.addComment);
+router.delete('/deleteComment/:id', postController.deleteComment);
 
 module.exports = router;

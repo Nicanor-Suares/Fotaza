@@ -1,8 +1,8 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 require("dotenv").config();
-const passport = require("./auth/passport")
 
 const routes = require("./routes/routes.js");
 const authRouter = require("./routes/auth.js");
@@ -16,17 +16,21 @@ const app = express();
 
 sequelizeConnection.sync({ force: false });
 
+require("./auth/passport");
+
 app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.json());
 
-dotenv.config({ path: "./env/.env" });
+const {getUserId} = require('./controllers/authController');
+app.use(getUserId);
 
-//app.use(passport.initialize());
+dotenv.config({ path: "./env/.env" });
 
 //static folders
 app.use(express.static('./public'));
