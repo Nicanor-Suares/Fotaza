@@ -4,6 +4,7 @@ const userModel = models.Usuario;
 const categoriasModel = models.Categorias;
 const tagsModel = models.Tags;
 const fotoTagModel = models.Foto_tag;
+const fotoComentModel = models.Foto_comentario;
 
 const postController = {
 
@@ -18,6 +19,7 @@ const postController = {
         { model: userModel, as: 'Usuario' },
         { model: categoriasModel, as: 'Categorias' },
         { model: tagsModel, as: 'Tags' },
+        { model: fotoComentModel, as: 'Foto_comentarios', include: [{ model: userModel, as: 'Usuario' }] },
       ],
     }).then(posts => {
       res.json(posts)
@@ -28,12 +30,14 @@ const postController = {
     return res;
   },
   getPost: (req, res) => {
+    console.log('ID POST GET', req.params.id);
     postModel.findOne({
       where: { post_id: req.params.id },
       include: [
         { model: userModel, as: 'Usuario' },
         { model: categoriasModel, as: 'Categorias' },
         { model: tagsModel, as: 'Tags' },
+        { model: fotoComentModel, as: 'Foto_comentarios' },
       ],
     }).then(post => {
       res.json(post)
@@ -42,9 +46,6 @@ const postController = {
       console.log(err)
     })
     return res;
-  },
-  showCreate: (req, res) => {
-    
   },
   createPost: async (req, res) => {
     try {
@@ -97,7 +98,6 @@ const postController = {
       res.status(500).json({ message: 'Post upload failed' });
     }
   },
-
   updatePost: (req, res) => {
     
   },
@@ -124,8 +124,6 @@ const postController = {
       res.status(500).json({ success: false, error: 'Ocurrió un error al eliminar el post.' });
     }
   },
-  
-
   //Categorías y etiquetas
   getCategories: (req, res) => {
     categoriasModel.findAll().then(categorias => {
@@ -144,6 +142,41 @@ const postController = {
       console.log(err)
     })
     return res;
+  },
+
+  //Comentarios
+  addComment: (req, res) => {
+    console.log('BODY', req.body);
+    const { post_id, user_id, comentario } = req.body;
+
+    fotoComentModel.create({
+      post_id,
+      user_id,
+      comentario,
+    })
+    .then(comment => {
+      res.json( { success: true, comment });
+    })
+    .catch(err => {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to create comment' });
+    });
+  },
+  deleteComment: (req, res) => {
+    const commentId = req.params.id;
+
+    fotoComentModel.destroy({
+      where: {
+        comentario_id: commentId,
+      },
+    })
+      .then(() => {
+        res.json({ success: true, message: 'Comment deleted successfully' });
+      })
+      .catch(err => {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to delete comment' });
+      });
   }
 
 }

@@ -17,6 +17,7 @@ const postDefault = {
   rights: 0,
 	image: '',
   tags: [],
+  comments: [],
   likes: 0,
   watermark: '',
 }
@@ -33,6 +34,7 @@ var vueApp = new Vue({
     post: JSON.parse(JSON.stringify(postDefault)),
     posts: [],
     allPosts: [],
+    newComment: '',
     categories: [],
     tags: [],
     selectedTags: [],
@@ -58,6 +60,11 @@ var vueApp = new Vue({
         this.allPosts = data;
         console.log(this.posts);
       })
+    },
+    async getPost(post_id) {
+      return fetch(`/posts/getPost/${post_id}`, {
+        method: "GET",
+      }).then(response => response.json());
     },
     sortBy(order) {
       if (order === 'recent') {
@@ -115,6 +122,36 @@ var vueApp = new Vue({
       this.estado = 0;
       this.post = JSON.parse(JSON.stringify(postDefault));
     },
+    async addComment(post_id) {
+      try {
+        let post = await this.getPost(post_id);
+    
+        const commentData = {
+          post_id: post.post_id,
+          user_id: post.Usuario.user_id,
+          comentario: this.newComment,
+        }; 
+    
+        const response = await fetch("/posts/addComment", {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(commentData),
+        });
+    
+        const data = await response.json();
+    
+        if (data.success) {
+          console.log(data);
+          this.estado = 0;
+          window.location.href = '/';
+        }
+      } catch (error) {
+        console.error(error);
+        // Handle error
+      }
+    },    
     getCategories() {
       fetch("posts/getCategories", {
         method: "GET",
@@ -158,9 +195,10 @@ var vueApp = new Vue({
     },
     abrirModalEditar(post_id){
       event.preventDefault();
+      console.log('hola');
       this.getCategories();
       this.getTags();
-      fetch(`/posts/get/${post_id}`, {
+      fetch(`/posts/getPost/${post_id}`, {
         method: "GET",
       }).then(response => response.json())
       .then(data => {
@@ -168,8 +206,7 @@ var vueApp = new Vue({
         
         if (this.postToEdit.Tags.some(tag => tag.tag_id === (this.tags[0] && this.tags[0].tag_id))) {
           console.log("It's included");
-        }        
-        
+        }      
       })
       $('#editPostModal').modal('show');
     },

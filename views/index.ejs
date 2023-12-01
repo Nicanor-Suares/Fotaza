@@ -36,7 +36,7 @@
             </div>
 
             <!-- New Post -->
-            <div class="card mb-3" style="margin-bottom: 1rem;" v-if="estado == estados.newPost">
+            <div class="card mb-3" v-if="estado == estados.newPost">
               <div class="card-body">
                   <h5 class="card-title">Nuevo Post</h5>
                 <form @submit.prevent="createPost()" enctype="multipart/form-data">
@@ -147,6 +147,23 @@
                       <small class="text-muted"> {{tag.tag_nombre }} </small>
                     </div>
                   </div>
+
+                  <div>
+                    <h6>Comments</h6>
+                    <div v-for="comment in post.Foto_comentarios" :key="comment.comentario_id">
+                      <p>{{ comment.Usuario.usuario }}: {{ comment.comentario }}</p>
+                    </div>
+                    
+                    <!-- Add Comment Form -->
+                    <form @submit.prevent="addComment(post.post_id)">
+                      <div class="mb-3">
+                        <label for="commentInput" class="form-label">Añadir comentario:</label>
+                        <input type="text" class="form-control" id="commentInput" v-model="newComment">
+                      </div>
+                      <button type="submit" class="btn btn-primary">Comentar</button>
+                    </form>
+                  </div>            
+
                 </div>
               </div>        
             </div>

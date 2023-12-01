@@ -27,15 +27,19 @@ models.Post.belongsToMany(models.Tags, {
   as: 'Tags',
 });
 
-models.Tags.belongsToMany(models.Post, {
-  through: models.Foto_tag,
-  foreignKey: 'tag_id',
-});
 
+//Tags
+models.Tags.belongsToMany(models.Post, { through: models.Foto_tag, foreignKey: 'tag_id' });
 models.Foto_tag.belongsTo(models.Post, { foreignKey: 'post_id' });
 models.Foto_tag.belongsTo(models.Tags, { foreignKey: 'tag_id' });
 models.Post.hasMany(models.Foto_tag, { foreignKey: 'post_id', as: 'Foto_tag' });
 models.Tags.hasMany(models.Foto_tag, { foreignKey: 'tag_id' });
+
+//Comments
+models.Usuario.hasMany(models.Foto_comentario, { foreignKey: 'user_id' });
+models.Post.hasMany(models.Foto_comentario, { foreignKey: 'post_id' });
+models.Foto_comentario.belongsTo(models.Usuario, { foreignKey: 'user_id' });
+models.Foto_comentario.belongsTo(models.Post, { foreignKey: 'post_id' });
 
 module.exports = models;
 module.exports = sequelizeConnection;

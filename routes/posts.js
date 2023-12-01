@@ -5,7 +5,7 @@ const postUpload = require('../libs/posts');
 
 //Posts ABM
 router.get('/getAll', postController.getAllPosts); 
-router.get('/get/:id', postController.getPost);
+router.get('/getPost/:id', postController.getPost);
 router.post('/create', postUpload, postController.createPost);
 router.put('/update/:id', postUpload, postController.updatePost);
 router.delete('/delete/:id', postController.deletePost);
@@ -15,5 +15,8 @@ router.delete('/delete/:id', postController.deletePost);
 //Categorías y etiquetas
 router.get('/getCategories', postController.getCategories);
 router.get('/getTags', postController.getTags);
+
+//Comments
+router.post('/addComment', postController.addComment);
 
 module.exports = router;
