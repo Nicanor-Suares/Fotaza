@@ -100,76 +100,99 @@
             </div>
 
             <!-- Posts -->
-            <div v-for="post in posts" ref="postElements" class="position-relative">
-              <div class="card w-50">
-                <!-- Image -->
-                <div class="card-header d-flex">
-                  <img :src="post.Usuario.avatar" class="rounded-circle" width="50" alt="">
-                  <a class="text-decoration-none text-dark me-2" href="#"> {{ post.Usuario.usuario }} </a>
-                  <h5>{{ post.title }}</h5>
-                  <div class="dropdown ms-auto" v-if="isAuthenticated && post.Usuario.user_id == loggedUser_id">
-                    <button
-                      class="btn btn-light"
-                      type="button"
-                      id="dropdownMenuButton"
-                      data-bs-toggle="dropdown"
-                      aria-haspopup="true"
-                      aria-expanded="false"
-                    >
-                      <!-- Three vertical dots icon -->
-                      &#8942;
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                      <a class="dropdown-item" href="#" @click="abrirModalEditar(post.post_id)">Editar</a>
-                      <a class="dropdown-item" href="" @click="abrirModalBorrar(post.post_id)">Eliminar</a>
-                    </div>
-                  </div>
-                </div>
-                
-                <img class="img-fluid" :src="post.image" alt="Post Image">
-                <div class="card-body">
-                  <!-- Title -->
-                  <!-- Description -->
-                  <p class="card-text">{{ post.description }}</p>
-                  <!-- Author and Date -->
-                  <p class="card-text">By {{ post.autor }} on {{ post.creation_date }}</p>
-                  <!-- Likes -->
-                  <p class="card-text">{{ post.likes }} Likes</p>
-                  <p class="card-text">{{ post.rights }} Rights</p>
-                </div>
-              
-                <div class="card-footer">
-                  <small class="text-muted">Category: {{post.Categorias.cat_nombre}} </small>
-                  <!-- Tags -->
-                  <div class="d-flex">
-                    <small class="text-muted">Tags: </small>
-                    <div v-for="tag in post.Tags">
-                      <small class="text-muted"> {{tag.tag_nombre }} </small>
-                    </div>
-                  </div>
+            <div class="posts-container">
+              <div v-for="post in posts" ref="postElements" class="mb-4">
+                <div class="card">
 
-                  <div>
-                    <h6>Comentarios</h6>
-                    <div v-for="comment in post.Foto_comentarios" :key="comment.comentario_id">
-                      <p>
-                        {{ comment.Usuario.usuario }}: {{ comment.comentario }}
-                        <!-- Add Delete Button for Comments -->
-                        <button v-if="isAuthenticated && comment.Usuario.user_id == loggedUser_id || isAuthenticated && comment.Usuario.user_id == post.Usuario.user_id" @click="deleteComment(comment.comentario_id)">Eliminar</button>
-                      </p>
+                  <!-- Image -->
+                  <div class="card-header d-flex align-items-center">
+                    <div class="d-flex flex-column">
+                      <a class="card-profile d-flex align-items-center text-decoration-none text-dark" :href=`/users/profile/${post.Usuario.user_id}`>
+                        <img :src="post.Usuario.avatar" class="rounded-circle" alt="">
+                        {{ post.Usuario.usuario }}
+                      </a>
+                      <h5 class="mt-1">{{ post.title }}</h5>
                     </div>
-                    
-                    <!-- Add Comment Form -->
-                    <form v-if="isAuthenticated" @submit.prevent="addComment(post.post_id)">
-                      <div class="mb-3">
-                        <label for="commentInput" class="form-label">Añadir comentario:</label>
-                        <input type="text" class="form-control" id="commentInput" v-model="newComment">
+                    <div class="dropdown ms-auto" v-if="isAuthenticated && post.Usuario.user_id == loggedUser_id">
+                      <button
+                        class="btn btn-light"
+                        type="button"
+                        id="dropdownMenuButton"
+                        data-bs-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                      >
+                        <!-- Three vertical dots icon -->
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                      </button>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="#" @click="abrirModalEditar(post.post_id)">Editar</a>
+                        <a class="dropdown-item" href="" @click="abrirModalBorrar(post.post_id)">Eliminar</a>
                       </div>
-                      <button type="submit" class="btn btn-primary">Comentar</button>
-                    </form>
-                  </div>            
+                    </div>
+                  </div>
+              
+                  <img class="img-fluid" :src="post.image" alt="Post Image">
 
+                  <div class="card-body">
+                    <!-- Description -->
+                    <p class="card-text mb-1">{{ post.description }}</p>
+
+                    <!-- Author and Date -->
+                    <p class="card-text mb-1">By {{ post.autor }} on {{ post.creation_date }}</p>
+
+                    <!-- Likes -->
+                    <div class="d-flex">
+                      <form class="actions_rating">
+                        <p class="mb-0">
+                          <input type="radio" :id="`${post.post_id}-1`" name="rating" value="5" v-model="rating">
+                          <label :for="`${post.post_id}-1`">★</label>
+                          <input type="radio" :id="`${post.post_id}-2`" name="rating" value="4" v-model="rating">
+                          <label :for="`${post.post_id}-2`">★</label>
+                          <input type="radio" :id="`${post.post_id}-3`" name="rating" value="3" v-model="rating">
+                          <label :for="`${post.post_id}-3`">★</label>
+                          <input type="radio" :id="`${post.post_id}-4`" name="rating" value="2" v-model="rating">
+                          <label :for="`${post.post_id}-4`">★</label>
+                          <input type="radio" :id="`${post.post_id}-5`" name="rating" value="1" v-model="rating">
+                          <label :for="`${post.post_id}-5`">★</label>
+                        </p>
+                      </form>
+                      <div class="actions_rating_average">{{ post.rating_average ? post.rating_average + ' (promedio)' : '' }}</div>
+                    </div>
+                    <p class="card-text">{{ post.rights }} Rights</p>
+                  </div>
+              
+                  <div class="card-footer">
+                    <small class="text-muted">Category: {{post.Categorias.cat_nombre}} </small>
+                    <!-- Tags -->
+                    <div class="d-flex align-items-center">
+                      <small class="text-muted">Tags: </small>
+                      <div v-for="tag in post.Tags">
+                        <small class="text-muted ms-1"> {{tag.tag_nombre }} </small>
+                      </div>
+                    </div>
+                    <div>
+                      <h6>Comentarios</h6>
+                      <div v-for="comment in post.Foto_comentarios" :key="comment.comentario_id">
+                        <p class="mb-1">
+                          {{ comment.Usuario.usuario }}: {{ comment.comentario }}
+                          <!-- Add Delete Button for Comments -->
+                          <button class="delete-comment" v-if="isAuthenticated && comment.Usuario.user_id == loggedUser_id || isAuthenticated && comment.Usuario.user_id == post.Usuario.user_id" @click="deleteComment(comment.comentario_id)"><i class="fa-solid fa-xmark"></i></button>
+                        </p>
+                      </div>
+              
+                      <!-- Add Comment Form -->
+                      <form v-if="isAuthenticated" @submit.prevent="addComment(post.post_id)">
+                        <div class="mb-3">
+                          <label for="commentInput" class="form-label">Añadir comentario:</label>
+                          <input type="text" class="form-control" id="commentInput" v-model="newComment">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Comentar</button>
+                      </form>
+                    </div>
+                  </div>
                 </div>
-              </div>        
+              </div>
             </div>
             
           </main>

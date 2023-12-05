@@ -82,13 +82,7 @@ const authController = {
   },
   showHome: (req, res) => {
     try {
-      // Check if the user is authenticated (You can define your own authentication logic here)
-      if (!req.session.userId) {
-        return res.status(403).json({ message: 'Access denied. Please log in.' });
-      }
-
-      // Render the user's home page or send a response
-      res.render('./index'); // You can render a template or send JSON data
+      res.render('./index');
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Failed to load home page' });

@@ -33,7 +33,7 @@
                 </li>
                 <% if (user_id) { %>
                   <li class="nav-item">
-                    <a class="nav-link text-white" href="#">
+                    <a class="nav-link text-white" href="/users/profile/<%= user_id %>">
                       <i class="fa fa-user pe-1"></i>
                       <span data-feather="file"></span>
                       Perfil
@@ -46,7 +46,7 @@
                       Configuración
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                      <a class="dropdown-item" href="/users/edit/1">Usuario</a>
+                      <a class="dropdown-item" href="/users/edit/<%= user_id %>">Usuario</a>
                       <a class="dropdown-item" href="#">Notificaciones</a>
                       <!-- Add more options as needed -->
                     </div>

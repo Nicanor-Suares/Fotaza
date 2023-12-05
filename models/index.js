@@ -41,5 +41,11 @@ models.Post.hasMany(models.Foto_comentario, { foreignKey: 'post_id' });
 models.Foto_comentario.belongsTo(models.Usuario, { foreignKey: 'user_id' });
 models.Foto_comentario.belongsTo(models.Post, { foreignKey: 'post_id' });
 
+//Likes
+models.Usuario.hasMany(models.Foto_like, {foreignKey: 'user_id'});
+models.Post.hasMany(models.Foto_like, {foreignKey: 'post_id'});
+models.Foto_like.belongsTo(models.Usuario, {foreignKey: 'user_id'});
+models.Foto_like.belongsTo(models.Post, { foreignKey: 'post_id' });
+
 module.exports = models;
 module.exports = sequelizeConnection;

@@ -38,6 +38,8 @@ var vueApp = new Vue({
     categories: [],
     tags: [],
     selectedTags: [],
+    rating: 0,
+    // radioId: `rating-${this.post.post_id}`,
     postToDelete: null,
     postToEdit: null,
     isAuthenticated: false,
@@ -104,7 +106,7 @@ var vueApp = new Vue({
     },
     createPost() {
       const formData = new FormData();
-      formData.append('user_id', '1');
+      formData.append('user_id', this.loggedUser_id);
       formData.append('title', this.post.title);
       formData.append('categoria_id', this.post.categoria_id);
       formData.append('description', this.post.description);
@@ -146,7 +148,7 @@ var vueApp = new Vue({
     
         const commentData = {
           post_id: post.post_id,
-          user_id: post.Usuario.user_id,
+          user_id: this.loggedUser_id,
           comentario: this.newComment,
         }; 
     

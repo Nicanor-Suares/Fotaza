@@ -1,6 +1,7 @@
 const userUpload = require('../libs/users');
 const {models} = require('../models/index');
 const userModel = models.Usuario;
+const postModel = models.Post;
 const rimraf  = require('rimraf');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -66,6 +67,25 @@ const userController = {
       res.json({success: false});
     }
   },
+
+  showProfile: async (req, res) => {
+    try {
+      let userId = req.params.id;
+  
+      let posts = await postModel.findAll({
+        where: { user_id: userId },
+        include: [
+          { model: userModel, as: 'Usuario' },
+        ],
+      });
+  
+      res.render('perfil', { title: 'Perfil - Fotaza', scripts: ['profile'], content: posts });
+    } catch (err) {
+      console.log(err);
+      res.status(500).send('Internal Server Error');
+    }
+  }
+  
 
 }
 
