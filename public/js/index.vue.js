@@ -18,7 +18,8 @@ const postDefault = {
 	image: '',
   tags: [],
   comments: [],
-  likes: 0,
+  likes: null,
+  average_likes: 0,
   watermark: '',
 }
 
@@ -39,7 +40,7 @@ var vueApp = new Vue({
     tags: [],
     selectedTags: [],
     rating: 0,
-    // radioId: `rating-${this.post.post_id}`,
+    //radioId: `rating-${this.post.post_id}`,
     postToDelete: null,
     postToEdit: null,
     isAuthenticated: false,
@@ -69,6 +70,19 @@ var vueApp = new Vue({
           const data = await response.json();
           this.posts = data;
           this.allPosts = data;
+
+          this.posts.forEach(post => {
+            // Check if the current post has a like from the current user
+            const currentUserLike = post.Foto_likes.find(like => like.user_id === this.loggedUser_id);
+            if (currentUserLike) {
+              // If the user has liked the post, set the rating accordingly
+              post.likes = currentUserLike.rating;
+            } else {
+              // If the user has not liked the post, set the rating to 0
+              post.likes = 0;
+            }
+          });
+
           resolve();
         } catch (error) {
           console.error(error);
@@ -188,7 +202,7 @@ var vueApp = new Vue({
         // Handle error
       }
     },    
-    getCategories() {
+    async getCategories() {
       fetch("posts/getCategories", {
         method: "GET",
       }).then(response => response.json())
@@ -196,12 +210,13 @@ var vueApp = new Vue({
         this.categories = data;
       })
     },
-    getTags() {
+    async getTags() {
       fetch("posts/getTags", {
         method: "GET",
       }).then(response => response.json())
       .then(data => {
         this.tags = data;
+        this.selectedTags = [];
       })
     },
     handleTagSelection() {
@@ -229,18 +244,23 @@ var vueApp = new Vue({
       // event.preventDefault();
       $('#deleteConfirmationModal').modal('hide');
     },
-    abrirModalEditar(post_id){
+    async abrirModalEditar(post_id){
       event.preventDefault();
-      this.getCategories();
-      this.getTags();
-      fetch(`/posts/getPost/${post_id}`, {
+      await this.getCategories();
+      await this.getTags();
+      await fetch(`/posts/getPost/${post_id}`, {
         method: "GET",
       }).then(response => response.json())
       .then(data => {
         this.postToEdit = data;
-        
-        if (this.postToEdit.Tags.some(tag => tag.tag_id === (this.tags[0] && this.tags[0].tag_id))) {
-        }      
+
+        this.selectedTags = [];
+
+        for (const editTag of this.postToEdit.Tags) {
+          if (editTag.hasOwnProperty('tag_id')) {
+            this.selectedTags.push(editTag.tag_id);
+          }
+        }
       })
       $('#editPostModal').modal('show');
     },
@@ -255,7 +275,7 @@ var vueApp = new Vue({
       formData.append('format', '');
       formData.append('rights', this.post.rights);
       formData.append('image', this.post.image);
-      formData.append('tags', this.post.tags);
+      formData.append('tags', this.selectedTags);
       formData.append('likes', '0');
       formData.append('watermark', 'aaa');
 
@@ -274,7 +294,44 @@ var vueApp = new Vue({
     cerrarModalEditar(){
       // event.preventDefault();
       $('#editPostModal').modal('hide');
-    }
+    },
+    ratePost(post_id) {
+      const vm = this
+
+      
+      const form = document.getElementById(`postRatingForm-${post_id}`);
+      const checkedRating = form.querySelector('input[name="rating"]:checked');
+      if (checkedRating) {
+
+        const ratingValue = checkedRating.value;
+
+        const ratingData = {
+          user_id: this.loggedUser_id,
+          rating: ratingValue,
+        }; 
+
+        fetch(`/posts/ratePost/${post_id}`, {
+          method: 'POST',
+          body: JSON.stringify(ratingData),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+      })
+          .then(res => res.json())
+          .then(data => {
+            if (data.error) {
+              console.error("Error rating:", data.error);
+            }
+            window.location.href = '/';
+            // vm.photo.rating_average = data.average
+          })
+          .catch(err => {
+            console.log(err)
+          });
+        } else {
+          console.log('No rating selected');
+        }
+      }
   },
   mounted() {
     this.getUser();

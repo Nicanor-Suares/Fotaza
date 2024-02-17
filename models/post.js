@@ -45,6 +45,10 @@ module.exports = (sequelize, DataTypes) => {
       type : DataTypes.INTEGER,
       defaultValue : 0
     },
+    average_likes: {
+      type : DataTypes.INTEGER,
+      defaultValue : 0
+    },
     watermark: {
       type : DataTypes.STRING,
       allowNull: false

@@ -5,6 +5,39 @@ const categoriasModel = models.Categorias;
 const tagsModel = models.Tags;
 const fotoTagModel = models.Foto_tag;
 const fotoComentModel = models.Foto_comentario;
+const fotoLikeModel = models.Foto_like;
+
+
+const getRatingAverage = async (post_id) => {
+  try {
+    const ratings = await fotoLikeModel.findAll({
+      where: {
+        post_id: post_id
+      },
+      attributes: ['rating']
+    });
+
+    let totalRating = 0;
+    ratings.forEach((rating) => {
+      totalRating += rating.rating;
+    });
+    const averageRating = ratings.length > 0 ? totalRating / ratings.length : 0;
+
+    const post = await postModel.findByPk(post_id);
+    if (post) {
+      post.average_likes = averageRating;
+      await post.save();
+      return averageRating;
+    } else {
+      console.error('Post not found');
+      return null;
+    }
+
+  } catch (error) {
+    console.error('Error calculating average rating:', error);
+    return null;
+  }
+};
 
 const postController = {
 
@@ -20,6 +53,7 @@ const postController = {
         { model: categoriasModel, as: 'Categorias' },
         { model: tagsModel, as: 'Tags' },
         { model: fotoComentModel, as: 'Foto_comentarios', include: [{ model: userModel, as: 'Usuario' }] },
+        { model: fotoLikeModel, as: 'Foto_likes', include: [{ model: userModel, as: 'Usuario' }] }
       ],
     }).then(posts => {
       res.json(posts)
@@ -48,7 +82,7 @@ const postController = {
   },
   createPost: async (req, res) => {
     try {
-      const { user_id, title, categoria_id, description, rights, watermark, likes, tags} = req.body;
+      const { user_id, title, categoria_id, description, rights, watermark, likes, average_likes, tags} = req.body;
       const creation_date = new Date();
       let success = false;
   
@@ -68,7 +102,7 @@ const postController = {
       const formatMatch = imageName.match(/\.([a-zA-Z0-9]+)$/);
       const format = formatMatch ? formatMatch[1] : null;
   
-      let newPost = await postModel.create({user_id, title, categoria_id, description, creation_date, format, watermark, likes, image: imagePath, rights});
+      let newPost = await postModel.create({user_id, title, categoria_id, description, creation_date, format, watermark, likes, average_likes, image: imagePath, rights});
   
       if(newPost){
         if (tags && tags.length > 0) {
@@ -172,7 +206,30 @@ const postController = {
         console.error(err);
         res.status(500).json({ error: 'Failed to delete comment' });
       });
-  }
+  },
+  ratePost: async (req, res) => {
+    const post_id = req.params.id;
+
+    const { user_id, rating } = req.body;
+
+    if (!post_id || !rating || !user_id) return res.status(500).json({ error: 'Failed to rate post' });
+
+    if (rating > 5) rating = 5
+    if (rating < 1) rating = 1
+  
+    let savedRating = await fotoLikeModel.findOne({ where: { post_id: post_id, user_id: user_id } });
+
+    if (savedRating) {
+      console.log('Updating rating...');
+      savedRating.rating = rating
+      await savedRating.save()
+    } else {
+      console.log('Creating new rating...');
+      savedRating = await fotoLikeModel.create({ post_id: post_id, user_id: user_id, rating: rating })
+    }
+
+    res.json( { success: true, savedRating, average: await getRatingAverage(post_id)});
+  },
 
 }
 

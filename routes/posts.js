@@ -21,4 +21,8 @@ router.get('/getTags', postController.getTags);
 router.post('/addComment', postController.addComment);
 router.delete('/deleteComment/:id', postController.deleteComment);
 
+//Likes
+router.post('/ratePost/:id', postController.ratePost);
+
+
 module.exports = router;

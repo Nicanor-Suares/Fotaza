@@ -142,22 +142,22 @@
                     <p class="card-text mb-1">By {{ post.autor }} on {{ post.creation_date }}</p>
 
                     <!-- Likes -->
-                    <div class="d-flex">
-                      <form class="actions_rating">
+                    <div class="d-flex"> <!-- check if theyre authenticated -->
+                      <form class="actions_rating" :id="'postRatingForm-' + post.post_id" @change.prevent="ratePost(post.post_id)">
                         <p class="mb-0">
-                          <input type="radio" :id="`${post.post_id}-1`" name="rating" value="5" v-model="rating">
+                          <input type="radio" :id="`${post.post_id}-1`" name="rating" value="5" v-model="post.likes" @input="post.likes = 5">
                           <label :for="`${post.post_id}-1`">★</label>
-                          <input type="radio" :id="`${post.post_id}-2`" name="rating" value="4" v-model="rating">
+                          <input type="radio" :id="`${post.post_id}-2`" name="rating" value="4" v-model="post.likes" @input="post.likes = 4">
                           <label :for="`${post.post_id}-2`">★</label>
-                          <input type="radio" :id="`${post.post_id}-3`" name="rating" value="3" v-model="rating">
+                          <input type="radio" :id="`${post.post_id}-3`" name="rating" value="3" v-model="post.likes" @input="post.likes = 3">
                           <label :for="`${post.post_id}-3`">★</label>
-                          <input type="radio" :id="`${post.post_id}-4`" name="rating" value="2" v-model="rating">
+                          <input type="radio" :id="`${post.post_id}-4`" name="rating" value="2" v-model="post.likes" @input="post.likes = 2">
                           <label :for="`${post.post_id}-4`">★</label>
-                          <input type="radio" :id="`${post.post_id}-5`" name="rating" value="1" v-model="rating">
+                          <input type="radio" :id="`${post.post_id}-5`" name="rating" value="1" v-model="post.likes" @input="post.likes = 1">
                           <label :for="`${post.post_id}-5`">★</label>
                         </p>
                       </form>
-                      <div class="actions_rating_average">{{ post.rating_average ? post.rating_average + ' (promedio)' : '' }}</div>
+                      <div class="actions_rating_average">{{ post.average_likes ? post.average_likes + ' (promedio)' : '' }}</div>
                     </div>
                     <p class="card-text">{{ post.rights }} Rights</p>
                   </div>
@@ -272,7 +272,6 @@
                                       :id="`tagCheckbox_${tag.tag_id}`"
                                       :value="tag.tag_id"
                                       v-model="selectedTags"
-                                      :checked="postToEdit.Tags ? postToEdit.Tags.some(t => t.tag_id === tag.tag_id) : false"
                                       />
                                       <label class="form-check-label" :for="`tagCheckbox_${tag.tag_id}`">{{ tag.tag_nombre }}</label>
                                     </div>
