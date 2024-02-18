@@ -26,8 +26,33 @@ const userController = {
   },
 
   showEditUser: async (req, res) => {
-    let userId = req.params.id;
-    let user = await userModel.findOne({ where: { user_id: userId } });
+    let user_id = req.params.id;
+    let user = await userModel.findOne({ 
+      where: { user_id: user_id },
+      include: [
+          { model: Usuario_notificaciones, as: 'Notifications', include: [
+              { model: userModel, as: 'PostOwner' },
+              { model: userModel, as: 'InterestedUser' },
+          ]}
+      ],
+    });
+
+    console.log('USUARIO', user);
+
+    if(user.Notifications) {
+      console.log('HAY NOTIFS');
+      let notificationList = [];
+      user.Notifications.forEach(notification => {
+        console.log('OWNER ID', notification.post_owner_id);
+        console.log('USER ID', user.user_id);
+        if (notification.post_owner_id === user.user_id) {
+            console.log(notification.notification_id);
+            notificationList.push(notification);
+          }
+        });
+        res.locals.notifications = notificationList;
+        console.log('LISTA', notificationList);
+    }
     res.render('editUser', {title: 'Editar Usuario - Fotaza', scripts: ['configuraciones'], user});
   },
 
