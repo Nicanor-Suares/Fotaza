@@ -39,8 +39,9 @@ var vueApp = new Vue({
     categories: [],
     tags: [],
     selectedTags: [],
+    notifications: [],
+    postOwnerEmail: '',
     rating: 0,
-    //radioId: `rating-${this.post.post_id}`,
     postToDelete: null,
     postToEdit: null,
     isAuthenticated: false,
@@ -56,6 +57,11 @@ var vueApp = new Vue({
           const data = await response.json();
           this.usuario = data;
           this.isAuthenticated = true;
+
+          if (data.Notifications && data.Notifications.length > 0) {
+            this.notifications = data.Notifications;
+            console.log(this.notifications);
+        }
         }
     
         await this.postsAuth(this.isAuthenticated);
@@ -70,15 +76,12 @@ var vueApp = new Vue({
           const data = await response.json();
           this.posts = data;
           this.allPosts = data;
-
+          console.log(this.posts);
           this.posts.forEach(post => {
-            // Check if the current post has a like from the current user
             const currentUserLike = post.Foto_likes.find(like => like.user_id === this.loggedUser_id);
             if (currentUserLike) {
-              // If the user has liked the post, set the rating accordingly
               post.likes = currentUserLike.rating;
             } else {
-              // If the user has not liked the post, set the rating to 0
               post.likes = 0;
             }
           });
@@ -182,7 +185,6 @@ var vueApp = new Vue({
         }
       } catch (error) {
         console.error(error);
-        // Handle error
       }
     },    
     async deleteComment(post_id) {
@@ -331,6 +333,72 @@ var vueApp = new Vue({
         } else {
           console.log('No rating selected');
         }
+      },
+      showNotifications() {
+        console.log('show notfs');
+          const dropdownMenu = document.getElementById('notificationDropdown');
+          if (dropdownMenu.classList.contains('show')) {
+              dropdownMenu.classList.remove('show');
+          } else {
+              dropdownMenu.classList.add('show');
+          }
+      },
+      async showInterest(post_id, post_owner_id) {
+        const vm = this;
+        let interested_user_id = this.loggedUser_id;
+
+        let notification_data = {
+          post_id: post_id,
+          post_owner_id: post_owner_id,
+          interested_user_id: interested_user_id
+        }
+
+        await fetch('/posts/notifyUser', {
+          method: 'POST',
+          body: JSON.stringify(notification_data),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.error) {
+              console.error("Error while notifying the user:", data.error);
+            }
+            fetch(`/users/${post_owner_id}`, { method: "GET" })
+            .then(res => res.json())
+            .then(data => {
+              if (data.error) {
+                console.error("Error fetching post owner's email:", data.error);
+              } else {
+                const postOwnerEmail = data.email;        
+                vm.openInterestedModal(postOwnerEmail);
+              }
+            })
+            .catch(err => {
+              console.error("Error fetching post owner's email:", err);
+            });
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      },
+      openInterestedModal(postOwnerEmail) {
+        this.postOwnerEmail = postOwnerEmail;      
+        $('#interestedModal').modal('show');
+      },
+      copyEmail() {
+        const email = document.getElementById('postOwnerEmail');
+        const range = document.createRange();
+        range.selectNode(email);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+      
+        document.execCommand('copy');
+      
+        window.getSelection().removeAllRanges();
+        $('#interestedModal').modal('hide');
+        alert('Email copiado!');        
       }
   },
   mounted() {

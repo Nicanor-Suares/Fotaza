@@ -5,8 +5,25 @@
   </button>
   <div class="navbar-nav">
     <% if (user_id) { %>
+      
       <!-- User is authenticated -->
-      <div class="nav-item text-nowrap">
+      <div class="nav-item text-nowrap d-flex">
+        <div class="dropdown dropstart" >
+          <a class="nav-link px-4 dropdown-toggle" href="#" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" >
+            <i class="fas fa-bell"></i>
+          </a>
+
+            <div class="dropdown-menu dropdown-menu-notification" aria-labelledby="dropdownMenuLink">
+              <% if (notifications && notifications.length > 0) { %>
+                  <% notifications.forEach(notification => { %>
+                      <li><a class="dropdown-item" href="#">El usuario <b><%= notification.InterestedUser.usuario %></b> está interesado en tu post. Por favor, chequea tu email!</a></li>
+                  <% }); %>
+              <% } else { %>
+                  <li><a class="dropdown-item" href="#">No notifications</a></li>
+              <% } %>
+          </div>
+
+        </div>
         <a class="nav-link px-4" href="/auth/logout">Salir</a>
       </div>
     <% } else { %>
@@ -61,3 +78,11 @@
         </div>
       </div>
       
+      <style>
+        /* Position the dropdown menu above the navbar */
+        .navbar-nav .dropdown-menu {
+          position: absolute;
+          min-width: auto; /* Let the width adjust dynamically based on content */
+          max-width: none; /* Allow the width to exceed the viewport width */       
+        }
+      </style>

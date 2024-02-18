@@ -113,21 +113,24 @@
                       </a>
                       <h5 class="mt-1">{{ post.title }}</h5>
                     </div>
-                    <div class="dropdown ms-auto" v-if="isAuthenticated && post.Usuario.user_id == loggedUser_id">
-                      <button
-                        class="btn btn-light"
-                        type="button"
-                        id="dropdownMenuButton"
-                        data-bs-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                      >
-                        <!-- Three vertical dots icon -->
-                        <i class="fa-solid fa-ellipsis-vertical"></i>
-                      </button>
-                      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" href="#" @click="abrirModalEditar(post.post_id)">Editar</a>
-                        <a class="dropdown-item" href="" @click="abrirModalBorrar(post.post_id)">Eliminar</a>
+                    <div class="ms-auto d-flex">
+                      <button class="btn btn-outline-secondary" v-if="post.Usuario.user_id != loggedUser_id" @click="showInterest(post.post_id, post.user_id)">Me interesa!</button>
+                      <div class="dropdown" v-if="isAuthenticated && post.Usuario.user_id == loggedUser_id">
+                        <button
+                          class="btn btn-light"
+                          type="button"
+                          id="dropdownMenuButton"
+                          data-bs-toggle="dropdown"
+                          aria-haspopup="true"
+                          aria-expanded="false"
+                        >
+                          <!-- Three vertical dots icon -->
+                          <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                          <a class="dropdown-item" href="#" @click="abrirModalEditar(post.post_id)">Editar</a>
+                          <a class="dropdown-item" href="" @click="abrirModalBorrar(post.post_id)">Eliminar</a>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -290,7 +293,25 @@
               </div>
             </div>
           </div>
-          
+
+          <!-- Modal Interested -->
+          <div class="modal fade" id="interestedModal" tabindex="-1" aria-labelledby="interestedModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="emailModalLabel">¡Contacta al creador!</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <p>Puedes contactar al creador por este medio: <span id="postOwnerEmail"> <b> {{ postOwnerEmail }} </b> </span></p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-primary" @click="copyEmail">Copiar</button>
+                </div>
+              </div>
+            </div>
+          </div>
 
         </div>
 

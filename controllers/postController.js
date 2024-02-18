@@ -6,6 +6,8 @@ const tagsModel = models.Tags;
 const fotoTagModel = models.Foto_tag;
 const fotoComentModel = models.Foto_comentario;
 const fotoLikeModel = models.Foto_like;
+const Usuario_notificaciones = models.Usuario_notificaciones;
+const jwt = require('jsonwebtoken');
 
 
 const getRatingAverage = async (post_id) => {
@@ -41,8 +43,46 @@ const getRatingAverage = async (post_id) => {
 
 const postController = {
 
-  showHome: (req, res) => {
-    res.render('index', {title: 'Inicio - Fotaza', scripts: ['index']});
+  showHome: async (req, res) => {
+    try {
+      const token = req.cookies.jwt;
+      if (token) {
+        const decoded = jwt.verify(token, 'secret');
+        const user_id = decoded.id;
+        let user = await userModel.findOne({ 
+          where: { user_id: user_id },
+          include: [
+              { model: Usuario_notificaciones, as: 'Notifications', include: [
+                  { model: userModel, as: 'PostOwner' },
+                  { model: userModel, as: 'InterestedUser' },
+              ]}
+          ],
+        });
+
+        console.log('USUARIO', user);
+
+        if(user.Notifications) {
+          console.log('HAY NOTIFS');
+          let notificationList = [];
+          user.Notifications.forEach(notification => {
+            console.log('OWNER ID', notification.post_owner_id);
+            console.log('USER ID', user.user_id);
+            if (notification.post_owner_id === user.user_id) {
+                console.log(notification.notification_id);
+                notificationList.push(notification);
+              }
+            });
+            res.locals.notifications = notificationList;
+            console.log('LISTA', notificationList);
+        }
+
+        res.render('index', {title: 'Inicio - Fotaza', scripts: ['index']});      
+      } else {
+        res.render('index', {title: 'Inicio - Fotaza', scripts: ['index']});
+      }
+    } catch (error) {
+      console.error(error);
+    }
   },
 
   //Posts ABM
@@ -230,7 +270,31 @@ const postController = {
 
     res.json( { success: true, savedRating, average: await getRatingAverage(post_id)});
   },
-
+  notifyUser: async (req, res) => {
+    try {
+      const { interested_user_id, post_owner_id, post_id } = req.body;
+  
+      // Check if the interested user and the post owner are different
+      if (interested_user_id === post_owner_id) {
+        return res.status(400).json({ error: 'Cannot notify the post owner about their own interest in the post.' });
+      }
+  
+      // Check if the post owner exists
+      const postOwner = await userModel.findByPk(post_owner_id);
+      if (!postOwner) {
+        return res.status(404).json({ error: 'Post owner not found.' });
+      }
+  
+      // Create a notification for the post owner
+      const notification = await Usuario_notificaciones.create({ post_id, interested_user_id, post_owner_id });
+  
+      // Return success response
+      res.json({ success: true, notification });
+    } catch (error) {
+      console.error('Error notifying user:', error);
+      res.status(500).json({ error: 'Failed to notify user.' });
+    }
+  }
 }
 
 module.exports = postController;

@@ -24,5 +24,7 @@ router.delete('/deleteComment/:id', postController.deleteComment);
 //Likes
 router.post('/ratePost/:id', postController.ratePost);
 
+//Notifs
+router.post('/notifyUser', postController.notifyUser);
 
 module.exports = router;

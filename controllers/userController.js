@@ -2,6 +2,7 @@ const userUpload = require('../libs/users');
 const {models} = require('../models/index');
 const userModel = models.Usuario;
 const postModel = models.Post;
+const Usuario_notificaciones = models.Usuario_notificaciones;
 const rimraf  = require('rimraf');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -11,7 +12,16 @@ const userController = {
 
   getUser: async (req, res) => {
     let userId = req.params.id;
-    let user = await userModel.findOne({ where: { user_id: userId } });
+    let user = await userModel.findOne({ 
+      where: { user_id: userId },
+      include: [
+          { model: Usuario_notificaciones, as: 'Notifications', include: [
+              { model: userModel, as: 'InterestedUser' },
+              { model: userModel, as: 'PostOwner' },
+              { model: postModel, as: 'Post' }
+          ]}
+      ]
+    });
     res.json(user);
   },
 

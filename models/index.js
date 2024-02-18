@@ -47,5 +47,18 @@ models.Post.hasMany(models.Foto_like, {foreignKey: 'post_id'});
 models.Foto_like.belongsTo(models.Usuario, {foreignKey: 'user_id'});
 models.Foto_like.belongsTo(models.Post, { foreignKey: 'post_id' });
 
+//Notifications
+models.Usuario.hasMany(models.Usuario_notificaciones, { foreignKey: 'post_owner_id', as: 'Notifications' });
+
+// Define association between Usuario_notificaciones and Usuario for interested users
+models.Usuario_notificaciones.belongsTo(models.Usuario, { foreignKey: 'interested_user_id', as: 'InterestedUser' });
+
+// Define association between Usuario_notificaciones and Usuario for post owners
+models.Usuario_notificaciones.belongsTo(models.Usuario, { foreignKey: 'post_owner_id', as: 'PostOwner' });
+
+// Define association between Usuario_notificaciones and Post
+models.Usuario_notificaciones.belongsTo(models.Post, { foreignKey: 'post_id', as: 'Post' });
+
+
 module.exports = models;
 module.exports = sequelizeConnection;
