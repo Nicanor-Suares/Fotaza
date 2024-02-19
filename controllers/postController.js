@@ -8,6 +8,8 @@ const fotoComentModel = models.Foto_comentario;
 const fotoLikeModel = models.Foto_like;
 const Usuario_notificaciones = models.Usuario_notificaciones;
 const jwt = require('jsonwebtoken');
+const Jimp = require('jimp');
+const jimpWatermark = require('jimp-watermark');
 
 
 const getRatingAverage = async (post_id) => {

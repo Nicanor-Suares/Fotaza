@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const postController = require('../controllers/postController');
 const authController = require('../controllers/authController');
-const postUpload = require('../libs/posts');
+const { uploads } = require('../libs/posts');
+const { addWatermark } = require('../libs/posts');
 
 //Posts ABM
 router.get('/getAll', postController.getAllPosts); 
 router.get('/getPost/:id', postController.getPost);
-router.post('/create', postUpload, authController.isAuthenticated, postController.createPost);
-router.put('/update/:id', postUpload, postController.updatePost);
+router.post('/create', uploads, addWatermark, authController.isAuthenticated, postController.createPost);
+router.put('/update/:id', uploads, postController.updatePost);
 router.delete('/delete/:id', postController.deletePost);
 //router.get('/get/:id', postController.getPost);
 

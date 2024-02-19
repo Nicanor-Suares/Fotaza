@@ -133,7 +133,7 @@ var vueApp = new Vue({
       formData.append('image', this.post.image);
       formData.append('tags', this.selectedTags);
       formData.append('likes', '0');
-      formData.append('watermark', 'aaa');
+      formData.append('watermark', this.post.watermark);
 
       fetch("/posts/create", {
         method: "POST",

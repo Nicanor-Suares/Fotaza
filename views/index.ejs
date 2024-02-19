@@ -52,7 +52,7 @@
                     <input type="file" name="image" ref="image" accept="image/*" @change="subirImagen" class="form-control" placeholder="Subir imágen" id="image">
                   </div>
                   <div class="row form-row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                       <div class="form-group">
                         <div class="mb-3">
                           <label for="postRights" class="form-label">Derechos</label>
@@ -64,7 +64,7 @@
                         </div>
                       </div>                      
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                       <div class="form-group">
                         <div>
                           <label for="postCategory" class="form-label">Categoría</label>
@@ -77,7 +77,13 @@
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                      <div class="form-group">
+                          <label for="watermark">Agrega tu marca de agua:</label>
+                          <input :disabled="post.rights == 0" type="text" class="form-control" id="watermark" placeholder="Ej: @user_name" v-model="post.watermark">
+                        </div>                     
+                    </div>
+                    <div class="col-md-3">
                       <div class="form-group">
                           <label for="tags">Selecciona hasta 3 tags:</label>
                           <div v-for="tag in tags" :key="tag.tag_id">
@@ -91,7 +97,8 @@
                             <label :for="'tag-' + tag.tag_id">{{ tag.tag_nombre }}</label>
                           </div>
                         </div>                     
-                      </div>     
+                      </div>
+
                   </div>
                   <button type="button" class="btn btn-secondary" @click="cancelPost()">Cancelar</button>
                   <button type="submit" class="btn btn-primary">Add Post</button>
@@ -162,7 +169,8 @@
                       </form>
                       <div class="actions_rating_average">{{ post.average_likes ? post.average_likes + ' (promedio)' : '' }}</div>
                     </div>
-                    <p class="card-text">{{ post.rights }} Rights</p>
+                    <p class="card-text" v-if="post && post.rights === 1">Derechos de autor: copyright</p>
+                    <p class="card-text" v-if="post && post.rights === 0">Derechos de autor: copyleft (uso libre) </p>                    
                   </div>
               
                   <div class="card-footer">
